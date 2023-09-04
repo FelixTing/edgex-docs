@@ -237,3 +237,8 @@ sends to EdgeX.
 
     This request asks core data to provide the last 100 events/readings associated to the RandNum-Device-01.
 
+## Known Issues
+
+1. The JSON data sent from core-metadata to the Device Service callback function enforces the conversion of string values to valid UTF-8, replacing "<", ">", "&", U+2028, and U+2029 with Unicode escape sequences because they can lead to security holes. See <https://pkg.go.dev/encoding/json#Marshal>.
+   However, the [JSON parser](https://github.com/IOTechSystems/iotech-c-utils/blob/aadfd8147f1b04b8c757f892f72e70fd688cce4f/src/c/data-json.c#L195-L238) in [iotech-c-utils](https://github.com/IOTechSystems/iotech-c-utils/tree/v1.5-branch) used by the C Device SDK is unable to accurately parse Unicode escape sequences. This will result in the C Device Service being unable to correctly read these characters.
+   For now, the workaround is to perform URL encoding on the mentioned characters before using them in device profile or device configuration and decode them in the device driver.
